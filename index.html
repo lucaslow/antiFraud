@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" id="viewport"
+        content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="applicable-device" content="mobile">
+    <meta name="robots" content="all">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="author" content="chinaunicom">
+    <meta name="Copyright" content="chinaunicom">
+    <meta name="applicable-device" content="mobile">
+    <meta name="Description" content="反诈骗" />
+    <meta name="Keywords" content="反诈骗" />
+    <!-- <title>嘿，同学！你有一份反诈骗试题待作答</title>  -->
+    <title>防范网络诈骗，宣传走进校园</title>
+    <link rel="stylesheet" href="./css/style.css?v=1.9">
+    <!-- <link rel="stylesheet" href="/css/style.css?v=1.1"> -->
+    <script>
+        var screenState = 'portrait';
+        var defaultFontSize = 0;
+        var rem = 0;
+        (function (win, doc) {
+            function setDefaultFontSize() {
+                var d = window.document.createElement('div')
+                d.style.width = '1rem'
+                d.style.display = "none"
+                var head = window.document.getElementsByTagName('head')[0]
+                head.appendChild(d)
+                defaultFontSize = parseFloat(window.getComputedStyle(d, null).getPropertyValue('width'))
+            }
+
+            function setFont() {
+                var designWidth = 640;
+                var rem2px = 100;
+                if (document.documentElement.clientWidth < 500) {
+                    screenState = 'portrait'
+                    if (document.body != null) {
+                        document.body.className = 'portrait'
+                    }
+                    var designWidth = 640;
+                } else {
+                    screenState = 'landscape'
+                    if (document.body != null) {
+                        document.body.className = 'landscape'
+                    }
+                    var designWidth = 1040;
+                }
+                if (/iPad|iPod/i.test(navigator.userAgent) && document.documentElement.clientWidth < document.documentElement.clientHeight) {
+                    screenState = 'portrait'
+                    if (document.body != null) {
+                        document.body.className = 'portrait'
+                    }
+                    var designWidth = 640;
+                }
+                document.documentElement.style.fontSize = window.innerWidth / designWidth * rem2px / defaultFontSize * 100 + '%';
+                rem = window.innerWidth / designWidth * rem2px
+
+            }
+            setDefaultFontSize()
+            setFont()
+            if (!win.addEventListener) return;
+            win.addEventListener('resize', setFont, false)
+        })(window, document)
+    </script>
+    <!-- <script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
+    <script>
+        new VConsole();
+    </script> -->
+</head>
+
+<body>
+    <!-- loadingPage -->
+    <div class="loadingPage">
+        <div class="loading_main">
+            <img src="./assets/loading_icon.png" alt="" class="loading_icon">
+            <p class="on">心中无贪念<br>骗局远身边</p>
+            <p>陌生电话莫轻信<br>对方身份要核清</p>
+            <p>短信说你卡消费<br>不予理睬最有效</p>
+            <p>天上不会掉馅饼<br>涉钱信息勿轻信</p>
+            <p>人人都能中大奖<br>点击链接就受骗</p>
+        </div>
+    </div>
+    <!-- student_v teacher_v -->
+    <div class="main" :class="version" id="app">
+        <div class="main_logo">
+            <img src="./assets/unicom_logo.png" alt="中国联通" class="unicom_logo">
+            <img src="./assets/zs_logo.png" alt="中山防诈骗中心" class="zs_logo">
+        </div>
+        <template>
+            <!-- coverPage -->
+            <section class="page page_1 active" data-page=1>
+                <div class="page_main">
+                    <div class="coverPage_header">
+                        <img src="./assets/slogan_cover.png" alt="slogan_cover" class="slogan_cover">
+                        <img src="./assets/slogan.png" alt="slogan" class="slogan">
+                        <img src="./assets/subSlogan.png" alt="subSlogan" class="tc subSlogan">
+                    </div>
+                    <div class="coverPage_info">
+                        <div class="info_area">
+                            <div class="info info_name flex">
+                                <span>姓名</span>
+                                <div class="input">
+                                    <input type="text" maxlength="100" id="info_name" placeholder="填写你的姓名" v-model="user_name"
+                                        @blur="initInput()">
+                                </div>
+                            </div>
+                            <div class="info info_town flex">
+                                <span>镇区</span>
+                                <div class="input">
+                                    <select name="town" id="info_town" v-model="user_town" @change="initUserSchool()">
+                                        <option value="-1" class="placehoder">选择所在镇区</option>
+                                        <option :value="item.town" v-for="(item, index) in town_school_config" :key="index">
+                                            {{item.town}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="info info_school flex">
+                                <span>学校</span>
+                                <div class="input">
+                                    <select name="school" id="info_school" v-model="user_school">
+                                        <option value="-1">请选择所在学校</option>
+                                        <option :value="item" v-for="(item, index) in curSchoolConfig" :key="index">
+                                            {{item}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="coverPage_control">
+                        <div class="control_btns flex">
+                            <div class="control_btn" @click="toMyAwards()">我的奖品</div>
+                            <div class="control_btn" @click="beginQuestion()">开始答题</div>
+                        </div>
+                        <div class="rule" @click="openDialog('dialog_rule')">
+                            <span>活动规则</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- questionPage -->
+            <section class="page page_2 blur" data-page=2>
+                <div class="page_cloud">
+                    <img src="./assets/cloud_1.png" alt="" class="cloud_1">
+                    <img src="./assets/cloud_2.png" alt="" class="cloud_2">
+                    <img src="./assets/cloud_3.png" alt="" class="cloud_3">
+                </div>
+                <div class="page_main">
+                    <div class="question_part">
+                        <transition name="fade">
+                        <div class="question_box" :class="'num_' + index" v-if="index === cur_ques_index"
+                            v-for="(questionConfig, index) in questions_config" :key="questionConfig.num">
+                            <div class="question_blank">
+                                <div class="questionIndex flex">
+                                    <span>{{questionConfig.num}}</span>
+                                </div>
+                                <div class="questionText flex">
+                                    <p class="flex">
+                                        {{questionConfig.question}}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="option_blank">
+                                <ul>
+                                    <li class="option" :class="{'on': user_active_opt.includes(opIndex)}" v-for="(option, opIndex) in questionConfig.options" @click="userChoice(opIndex, questionConfig.isMult, questionConfig.isNeed)">
+                                        <div class="tabIndex">
+                                            <span class="flex">{{serConfig[opIndex]}}</span>
+                                        </div>
+                                        <div class="optionText">{{option}}</div>
+                                        <!-- 对错icon出现条件：是否需要显示答案 + 用户当前是否选择了这个选项 -->
+                                        <span class="judgeIcon" :class="{'isTrue' : opIndex == questionConfig.correctOpt}" v-if="user_active_opt.includes(opIndex) && questionConfig.isNeed"></span>
+                                    </li>
+                                    <!-- 补充说明出现的条件：可多选的 + 选项选择了D -->
+                                    <div class="supply" v-if="questionConfig.isMult && user_active_opt.includes(3) && version === 'student'">
+                                        <input type="text" id="supply_text" placeholder="补充说明：" v-model="supplyText" @blur="initInput()" @change="initInput()">
+                                    </div>
+                                    <div class="supply" v-if="index == 5 && user_active_opt.includes(3) && version === 'teacher'">
+                                        <input type="text" id="supply_text" placeholder="补充说明：" v-model="supplyText" @blur="initInput()" @change="initInput()">
+                                    </div>
+                                </ul>
+                            </div>
+                            <div class="answer_blank">
+                                <!-- 正确答案出现条件： 是否需要显示答案 + 用户当前是否已经选择了选项 + 用户是否选择错了 -->
+                                <div class="answer flex" :class="{'show' : questionConfig.isNeed && user_active_opt.length !==0 && !user_active_opt.includes(questionConfig.correctOpt)}">
+                                    正确答案：<span>{{serConfig[questionConfig.correctOpt]}}</span></div>
+                                <div class="next_question" :class="{'show' : user_active_opt.length}" @click="nextQues()">
+                                    <img src="./assets/next_btn.png" alt="" class="next_btn">
+                                </div>
+                            </div>
+                            <img src="./assets/icon_1.png" alt="" class="icon_1">
+                        </div>
+                        </transition>
+                    </div>
+                </div>
+            </section>
+
+            <!-- lotteryPage -->
+            <section class="page page_3 blur" data-page=3>
+                <div class="page_main">
+                    <div class="lottery_body">
+                        <img src="./assets/lottery_top.png" alt="" class="lottery_top">
+                        <div class="lottery">
+                            <div class="lottery-item">
+                                <div class="lottery-start" @click="startLottery()">
+                                    <img src="./assets/gift/lottery_btn.png" alt="">
+                                </div>
+                                <ul>
+                                    <li v-for="(item, index) in gift_config" :class="index==activeIndex?'on':''">
+                                        <div class="box">
+                                            <img :src="item.img" alt="">
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 未抽奖 -->
+            <section class="page page_4 blur" data-page=4>
+                <div class="page_cloud">
+                    <img src="./assets/cloud_1.png" alt="" class="cloud_1">
+                    <img src="./assets/cloud_2.png" alt="" class="cloud_2">
+                    <img src="./assets/cloud_3.png" alt="" class="cloud_3">
+                </div>
+                <div class="page_main">
+                    <img src="./assets/icon_2.png" alt="" class="icon_2">
+                    <div class="award_box">
+                        <p class="head">你还没有抽奖，<br>赶紧答题参与抽奖吧！</p>
+                        <img src="./assets/begin_btn.png" alt="" class="begin_btn" @click="beginQuestion()">
+                        <p class="award_tips">奖品发放：所有奖品将于活动结束后<br>10个工作日内安排发放。</p>
+                    </div>
+                </div>
+            </section>
+
+             <!-- 已经抽奖 -->
+             <section class="page page_5 blur" data-page=5>
+                <div class="page_cloud">
+                    <img src="./assets/cloud_1.png" alt="" class="cloud_1">
+                    <img src="./assets/cloud_2.png" alt="" class="cloud_2">
+                    <img src="./assets/cloud_3.png" alt="" class="cloud_3">
+                </div>
+                <div class="page_main">
+                    <img src="./assets/icon_2.png" alt="" class="icon_2">
+                    <div class="award_box">
+                        <div class="award_lists">
+                            <div class="flex award_list" v-for="(item, index) in draw_log">
+                                <p>{{item.prize_name}}</p>
+                                <a href="javascript:;" class="more_btn" @click="getGiftDetail(item.prize_id, item.prize_cdk)"></a>
+                            </div>
+                        </div>
+                        <div class="page4_control_btns flex">
+                            <img src="./assets/share_btn.png" alt="" class="share_btn" @click="openDialog('dialog_share')">
+                            <img src="./assets/again_btn.png" alt="" class="again_btn" @click="beginQuestion()">
+                        </div>
+                        <p class="award_tips">奖品发放：所有奖品将于活动结束后<br>10个工作日内安排发放。</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 奖品详情页 -->
+            <!-- cur_detail_id 决定显示奖品详情页对应的奖品 -->
+            <section class="page page_6 blur" data-page=6>
+                <div class="page_cloud">
+                    <img src="./assets/cloud_1.png" alt="" class="cloud_1">
+                    <img src="./assets/cloud_2.png" alt="" class="cloud_2">
+                    <img src="./assets/cloud_3.png" alt="" class="cloud_3">
+                </div>
+                <div class="page_main">
+                    <div class="gift_detail_body">
+                        <img src="./assets/gift_detail/text.png" alt="" class="gift_detail_text">
+                        <!-- 风扇 -->
+                        <div class="fs gift_detail_list" v-if="cur_detail_id == 0">
+                            <img src="./assets/gift_detail/fs.png" alt="" class="item">
+                            <!-- 留资 -->
+                            <a href="javascript:;" class="gift_btn btn_2" @click="goPagedo(7)"></a>
+                        </div>
+                        <!-- 滴滴券 -->
+                        <div class="didi gift_detail_list" v-if="cur_detail_id == 1">
+                            <img src="./assets/gift_detail/didi.png" alt="" class="item">
+                            <!-- 链接 -->
+                            <a href="https://s.didi.cn/HZDce" class="gift_btn btn_1"></a>
+                        </div>
+                        <!-- 5GN -->
+                        <div class="5GN gift_detail_list" v-if="cur_detail_id == 2">
+                            <div class="item">
+                                <img src="./assets/gift_detail/5gn.png" alt="" class="item">
+                                <p class="item_text">5Gn兑换券码：<span>{{prize_cdk}}</span></p>
+                            </div>
+                            <!--  -->
+                            <a href="javascript:;" class="gift_btn btn_2"></a>
+                        </div>
+                        <!-- 亲子卡 -->
+                        <div class="qzk gift_detail_list" v-if="cur_detail_id == 3">
+                            <img src="./assets/gift_detail/qzk.png" alt="" class="item">
+                            <!-- 链接 -->
+                            <a href="https://m.10010.com/scaffold-show/prew/parentage-card?p=51&c=556&u=nk5nhZIkZowOs2Ofev7MIQ%3D%3D&param=9sP7LVZ50r0udRxfC9Qc5UiU2o80h2xfQaaqPinotqpaRUoBAPrtDkudyZKybD35jZw6fqXEt3aLMiA7tr9mL8RsTmicp5Xw7G2c8HQYd%2FRgppb503XVP16XLK6D%2F3fyyQ4KjYodOmann9fN%2FvgXYOR5BGnCVsuPXu7R5FxrKti8KuzTg5F9CUU0rPrjdw0UHpcBiErH8PrtvUGSzh9WoQ%3D%3D&orderType=5&sceneType=3&channel=9999&s=03&sceneFlag=03" class="gift_btn btn_3"></a>
+                        </div>
+                        <!-- 芝芝卡 -->
+                        <div class="qzk gift_detail_list" v-if="cur_detail_id == 4">
+                            <img src="./assets/gift_detail/zzk.png" alt="" class="item">
+                            <!-- 链接 -->
+                            <a href="https://m.10010.com/scaffold-show/zhishiCard?p=51&c=556&u=nk5nhZIkZowOs2Ofev7MIQ%3D%3D&s=03&sceneFlag=03" class="gift_btn btn_3"></a>
+                        </div>
+                        <!-- 抱枕（教师） -->
+                        <div class="bz gift_detail_list" v-if="cur_detail_id == 5 && version == 'teacher'">
+                            <img src="./assets/gift_detail/bz.png" alt="" class="item">
+                            <!-- 留资 -->
+                            <a href="javascript:;" class="gift_btn btn_2" @click="goPagedo(7)"></a>
+                        </div>
+                        <!-- 一盒笔(学生) -->
+                        <div class="pen gift_detail_list" v-if="cur_detail_id == 5 && version == 'student'">
+                            <img src="./assets/gift_detail/pen.png" alt="" class="item">
+                            <!-- 留资 -->
+                            <a href="javascript:;" class="gift_btn btn_2" @click="goPagedo(7)"></a>
+                        </div>
+                        <!-- 耳机 -->
+                        <div class="headphone gift_detail_list" v-if="cur_detail_id == 6">
+                            <img src="./assets/gift_detail/headphone.png" alt="" class="item">
+                            <!-- 留资 -->
+                            <a href="javascript:;" class="gift_btn btn_2" @click="goPagedo(7)"></a>
+                        </div>
+                        <!-- 天猫精灵 -->
+                        <div class="mall gift_detail_list" v-if="cur_detail_id == 7">
+                            <img src="./assets/gift_detail/mall.png" alt="" class="item">
+                            <!-- 留资 -->
+                            <a href="javascript:;" class="gift_btn btn_2" @click="goPagedo(7)"></a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 填写个人信息 -->
+            <section class="page page_7 blur" data-page=7>
+                <div class="page_main">
+                    <img src="./assets/info_top.png" alt="" class="info_top">
+                    <div class="apply_part">
+                        <div class="coverPage_info">
+                            <div class="info_area">
+                                <div class="info info_name flex">
+                                    <span>姓名</span>
+                                    <div class="input">
+                                        <input type="text" id="info_name" placeholder="填写你的姓名" v-model="user_info.name"
+                                            @blur="initInput()">
+                                    </div>
+                                </div>
+                                <div class="info info_name flex">
+                                    <span>电话</span>
+                                    <div class="input">
+                                        <input type="text" id="info_name" placeholder="填写电话" v-model="user_info.tel"
+                                            @blur="initInput()">
+                                    </div>
+                                </div>
+                                <div class="info info_name flex">
+                                    <span>地址</span>
+                                    <div class="input">
+                                        <input type="text" id="info_name" placeholder="填写地址" v-model="user_info.address"
+                                            @blur="initInput()">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <img src="./assets/apply_info_btn.png" alt="" class="apply_info_btn" @click="applyInfo()">
+                        <p class="award_tips">奖品发放：所有奖品将于活动结束后<br>10个工作日内安排发放。</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 留资成功 -->
+            <section class="page page_8 blur" data-page=8>
+                <div class="page_main">
+                    <img src="./assets/info_top.png" alt="" class="info_top">
+                    <div class="apply_success">
+                        <img src="./assets/apply_success.png" alt="" class="apply_success_icon">
+                        <div class="apply_btn_wrap flex">
+                            <div class="apply_success_btns flex">
+                                <img src="./assets/share_btn2.png" alt="" class="share_btn" @click="openDialog('dialog_share')">
+                                <img src="./assets/again_btn2.png" alt="" class="again_btn" @click="beginQuestion()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </template>
+        <div class="dialog_wrap">
+            <!-- 我的奖品（已经中奖） -->
+            <div class="dialog dialog_award dialog_type_1" id="dialog_award">
+                <div class="type_head_1 flex">
+                    <p>我的奖品</p>
+                </div>
+                <div class="type_middle_1">
+
+                </div>
+                <div class="type_foot_1 flex">
+                    <div class="dialog_control_btns flex">
+                        <img src="./assets/share_btn.png" alt="" class="share_btn">
+                        <img src="./assets/again_btn.png" alt="" class="again_btn" @click="beginQuestion()">
+                    </div>
+                </div>
+            </div>
+            <!-- 我的奖品（尚未中奖） -->
+            <div class="dialog dialog_no_award dialog_type_1" id="dialog_no_award">
+                <div class="type_head_1 flex">
+                    <!-- <p>我的奖品</p> -->
+                </div>
+                <div class="type_middle_1 flex">
+                    <p>
+                        你还没有中奖，<br>赶紧答题参与抽奖吧！
+                    </p>
+                </div>
+                <div class="type_foot_1 flex">
+                    <div class="dialog_control_btns flex">
+                        <img src="./assets/begin_btn.png" alt="" class="begin_btn">
+                    </div>
+                </div>
+            </div>
+            <!-- 规则 -->
+            <div class="dialog dialog_rule" id="dialog_rule">
+                <a href="javascript:;" class="close_btn" @click="closeDialog()"></a>
+                <div class="rule_body">
+                    <p class="head">活动规则</p>
+                    <ul>
+                        <li class="flex">
+                            <span class="flex">1.</span>
+                            <p>活动时间：2020年10月9日09:00至2020年11月9日12:00</p>
+                        </li>
+                        <li class="flex">
+                            <span class="flex">2.</span>
+                            <p>抽奖规则：每个用户不限答题次数，每次答完题后均可获得抽奖机会。</p>
+                        </li>
+                        <li class="flex">
+                            <span class="flex">3.</span>
+                            <p>活动奖品：可在活动首页 - 我的奖品处查看。</p>
+                        </li>
+                        <li class="flex">
+                            <span class="flex">4.</span>
+                            <p>所有奖品将于活动结束后10个工作日内安排发放。</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <!-- 开始答题提示弹窗 -->
+            <div class="dialog dialog_begin_tips" id="dialog_begin_tips">
+                <img src="./assets/begin_tips.png" alt="">
+            </div>
+            <div class="dialog dialog_share" id="dialog_share">
+                <div class="share_tips" @click="closeDialog()">
+                    <p>赶紧分享好友，一起来答题抽好礼吧！</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="./js/axios.min.js"></script>
+    <script src="http://wx.szhhhd.com/public/wxLogin.js"></script>
+    <script src="./js/data/config_data.js"></script>
+    <script src="./js/jquery-3.4.1.min.js"></script>
+    <!-- <script src="https://cdn.bootcdn.net/ajax/libs/jquery/1.10.0/jquery.js"></script> -->
+    <script src="./js/createjs.min.js"></script>
+    <script src="./js/api.js?v=1.5"></script>
+    <script src="./js/app.js?v=2.2"></script>
+
+    <script>
+        // 教师
+        var _wxData = {
+            shareTitle : "防范网络诈骗，宣传走进校园",
+            shareDesc : "诈骗套路知多少？中山联通反诈知识宣传，答题人人有奖！",
+            shareImgUrl : "http://wx.szhhhd.com/public/h5/a20200924answer_t/assets/share.jpg"
+        };
+
+        // 学生
+        // var _wxData = {
+        //     shareTitle : "嘿，同学！你有一份反诈骗试题待作答",
+        //     shareDesc : "诈骗套路知多少？中山联通反诈知识宣传，答题人人有奖！",
+        //     shareImgUrl : "http://wx.szhhhd.com/public/h5/a20200924answer_t/assets/share.jpg"
+        // };
+    </script>
+    <script src="./js/share.js"></script>
+
+</body>
+
+</html>
+
+<script>
+
+
+</script>
